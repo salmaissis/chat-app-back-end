@@ -16,20 +16,28 @@ class LoginController extends Controller
     public function index(Request $request)
     {
         // retrieving the user from database
-        $user = User::where('email', '=', $request->email)->first();
-        if (md5($request->password) == $user->password) {
-
+        try {
+            //code...
+            $user = User::where('email', '=', $request->email)->get();
+            if (!(md5($request->password) == $user->password)) {
+                return response()->json([
+                    'message' => 'login failed'
+                ]);
+            }
             // making a user session and sending it to the front-end
             session(['user_id' => $user->id]);
             $user_id = session('user_id');
             return response()->json([
-                'current user id' => $user_id,
-                'current user email' => $request->email,
+                'user' => $user
+                // 'current user email' => $request->email,
             ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => $th
+                // 'current user email' => $request->email,
+            ]);
+            //throw $th;
         }
-        return response()->json([
-            'Message' => 'login failed'
-        ]);
 
 
     }
